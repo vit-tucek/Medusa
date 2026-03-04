@@ -1,0 +1,52 @@
+How to use these programs:
+
+There are 4 executable files that work together to form matings.
+
+1. "mate_interact" is the first program you'll want to run (for unix
+users, after you've downloaded, unzipped, and compiles the programs,
+simply type "mate_interact" at a command prompt). Enter a p1/q1 and p2/q2,
+and mate_interact computes a list of real numbers (an, bn)  which will
+converge to the parameters (a,b) in the Rational Map f(x) =(az^2 + 1 -
+a)/(bz^2 + 1 - b), which is the mating of the two polynomials. 
+"mate_interact" builds a text file containing this list, called
+"param.txt" by default. 
+
+2.  "drawpullback" will output a postscript picture of the mating found by
+mate_interact, which is stored in "param.txt".  To use: type
+"drawpullback".  It will ask for an "Output filename".  Type in something
+with a .eps ending.  It will ask "Read from file", here type the file you
+just created with mate_interact, called "param.txt" if you chose the
+default.  The picture it creates is on the plane, so it will ask you for
+bounds.  If you want the square -4...4 by -4...4, tell it: "min(Re(z))"
+is -4, max(Re(z)) is 4, min(Im(z) is -4, and max(Im(z) is 4.  It finally
+asks what resolution(dpi) you want.  144 is pretty good. Then you'll see
+it printing a rough sketch of the picture to the screen.  This is so you
+can monitor it's progress, and also tell if the bounds you chose are big
+enough.  When it's done, there's the .eps file you named in the directory
+you're in.
+
+3. "draw_pb_sphere" is an alternate program for drawing pictures of
+matings.  A mating is naturally a picture on a sphere.  The flat version
+drawn in "drawpullback" is a stereographic projection.  "draw_pb_sphere" 
+will draw the mating on the sphere.  It also outputs an .eps file, and
+reads in the text file created by mate_interact.  If you've mated p1/q1
+with p2/q2, then what you see in the "draw_pb_sphere" pic. is p1/q1 in
+black and p2/q2 in _clear_.  The grey you see is the back of the black
+julia set, which you see because you can look through the clear julia set
+and see the other side of the sphere. Zero lies in the "center" of each
+julia set.  The center of p1/q1 is at the south pole.  The center of p2/q2
+is at the north pole.  Note that each julia set still preserves its
+structure (you can recognize it in the mating pic), but parts of each are
+pulled and distorted to fill up the cracks between parts of the other set.
+
+
+4. "find_matings" is independent of the other 3.  This program computes
+the matings of n/256 for each n with one other angle p/q.  It was never
+quite polished ... it is written for p/q = 3/7, and to run with a
+different p/q the user must change the source code by hand.  Good luck.
+
+NOTE: There are still a few bugs, most notably: when mating with a p/q
+where q is even, the algorithm will converge properly for a few steps,
+then start diverging. 
+
+
