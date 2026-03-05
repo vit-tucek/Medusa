@@ -28,3 +28,9 @@ mating_data.txt
 # Generated graphics/output
 gfx/
 output/
+output_py/
+
+# Python artifacts
+*.pyc
+python/__pycache__/
+notebooks/.ipynb_checkpoints/
