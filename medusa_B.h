@@ -52,7 +52,7 @@ class Joint : public Medusa_comp
 class Medusa
 {
   public :
-    Medusa(int, int, int);
+    Medusa(long int, long int, long int);
     ~Medusa(void);
     CComplex param_a(void) {return a;};
     CComplex param_b(void) {return b;};
@@ -99,12 +99,13 @@ class Medusa
     Leg_list i_legs;
     Leg_list o_legs;
 
-    void findorbit(int, int, DynArray<int>&, int&, int&);
-    void find_kneading_data(int, int, int, DynArray<int>&, 
+    void findorbit(long int, long int, DynArray<long int>&, int&, int&);
+    void find_kneading_data(long int, int, int, DynArray<long int>&,
 		     Preim_list*, Preim_list*);
 
-    void find_succ(int, int, DynArray<int>&,int&, int&, int&);
-    void init_body(DynArray<int>&, DynArray<int>&, int);
+    void find_succ(long int, long int, DynArray<long int>&, int&,
+                   long int&, int&);
+    void init_body(DynArray<long int>&, DynArray<long int>&, long int);
     void invf(CComplex, CComplex, CComplex&, CComplex&);
     void pullback_leg(int, int, Leg_list, Leg_list, CComplex&, Joint*,
 		      DynArray<CComplex>&);
@@ -126,7 +127,6 @@ class Medusa
 
 
 #endif
-
 
 
 

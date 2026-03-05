@@ -17,7 +17,7 @@ typedef complex<double> Complex;
 const ddouble epsilon = 1e-15;
 const ddouble EPSILON = 1e-15;
 const ddouble infinity = 1e100;
-const ddouble INFINITY = 1e100;
+const ddouble MEDUSA_INFINITY = 1e100;
 
 //----------------------------------------------------------------------
 
@@ -115,7 +115,7 @@ int not_lies_in_sector (CComplex a, CComplex b, CComplex x, CComplex z)
 CComplex mobius_to_line (CComplex z, CComplex a, CComplex b, CComplex star)
 {
 	if (numerical_equal (z, star))
-		return (INFINITY);
+		return (MEDUSA_INFINITY);
 
 	return ((z-a)/(z-star) * (b-star)/(b-a));
 }
@@ -282,9 +282,9 @@ int	find_circle (CComplex a, CComplex b, CComplex star,
 	ddouble c2 = imag (star);
 	ddouble c, d, e;
 
-	//if (norm (a) >= INFINITY
-	//    || norm (b) >= INFINITY
-	//    || norm (star) >= INFINITY)
+	//if (norm (a) >= MEDUSA_INFINITY
+	//    || norm (b) >= MEDUSA_INFINITY
+	//    || norm (star) >= MEDUSA_INFINITY)
 	//	return (0);
 
 	//if (abs (imag ((star-a)/(b-a))) <= sqrt (EPSILON))
@@ -303,15 +303,15 @@ int	find_circle (CComplex a, CComplex b, CComplex star,
 		center = CComplex (- c/2, - d/2);
 		radius = abs (center - a);
 	} else {
-		center = INFINITY;
-		radius = INFINITY;
+		center = MEDUSA_INFINITY;
+		radius = MEDUSA_INFINITY;
 	}
 
 	average = (a + b + star) / 3;
 
-	if (abs (center) >= INFINITY) {
+	if (abs (center) >= MEDUSA_INFINITY) {
 #ifdef DEBUG_FC
-		cout << "Center greater than INFINITY" << center << a << b << star << endl; cout.flush ();
+		cout << "Center greater than MEDUSA_INFINITY" << center << a << b << star << endl; cout.flush ();
 #endif
 	}
 	return (1);
@@ -538,11 +538,11 @@ int	find_intersections (CComplex a, CComplex b, CComplex star,
 		cout << "Returning 2 intersections" << endl; cout.flush ();
 #endif
 		return (2);
-	} else if (discriminant >= INFINITY) {
+	} else if (discriminant >= MEDUSA_INFINITY) {
 		order_points (intersection_pts);
 		order_points (lista_pts);
 #ifdef DEBUG_FI
-		cout << "discriminant >= INFINITY" << endl; cout.flush ();
+		cout << "discriminant >= MEDUSA_INFINITY" << endl; cout.flush ();
 #endif
 		return (2);
 	} else if (discriminant > 0.0) {
@@ -692,8 +692,8 @@ int	is_homotopic (CComplex a, CComplex b, CComplex star,
 	    || (abs (real (a)) < EPSILON && abs (imag (a)) < EPSILON)) {
 	    */
 	if (abs (real (a) * imag (a)) <= EPSILON || abs (real (b) * imag (b)) <= EPSILON) {
-		if (!(abs (center) < INFINITY))
-			if (!(abs (star) < INFINITY))
+		if (!(abs (center) < MEDUSA_INFINITY))
+			if (!(abs (star) < MEDUSA_INFINITY))
 				return (1);
 				/*
 			    || imag ((star-a)/(a*CComplex (0,1))) * imag ((b-a)/(a*CComplex (0,1))) < 0
@@ -730,11 +730,11 @@ int	is_homotopic (CComplex a, CComplex b, CComplex star,
 	return (1);
 	}
 
-	if (!(abs (center) < INFINITY)) {
+	if (!(abs (center) < MEDUSA_INFINITY)) {
 #ifdef DEBUG_FP
 		cout << "Uh oh" << center << a << b << star << endl; cout.flush ();
 #endif
-		if (!(abs (star) < INFINITY)
+		if (!(abs (star) < MEDUSA_INFINITY)
 		    || (imag ((star-a)/((b-a)*CComplex (0,1))) * imag ((b-a)/((b-a)*CComplex (0,1))) < 0
 			|| imag ((star-b)/((b-a)*CComplex (0,1))) * imag ((a-b)/((b-a)*CComplex (0,1))) < 0)) {
 			for (point_i = 1; point_i <= length; point_i++) {
@@ -764,7 +764,7 @@ int	is_homotopic (CComplex a, CComplex b, CComplex star,
 	} else {
 //		cout << "# intersection pts: " << find_intersections (a, b, star, intersection_pts) << endl; cout.flush ();
 		/*
-		if (!(abs (star) < INFINITY)) {
+		if (!(abs (star) < MEDUSA_INFINITY)) {
 			for (point_i = 1; point_i <= length; point_i++) {
 				z = distinguished_pts [point_i];
 				z *= rotation;
@@ -968,7 +968,7 @@ int	can_prune (CComplex a, CComplex b, CComplex c, CComplex star,
 	if (numerical_equal (a, c) || numerical_equal (b, c))
 		return (1);
 
-	int star_at_inf = (norm (star) >= INFINITY); 
+	int star_at_inf = (norm (star) >= MEDUSA_INFINITY); 
 	if (!star_at_inf)
 		{
 			a_mob = 1/(a - star);	   /* Mobius transformation   */

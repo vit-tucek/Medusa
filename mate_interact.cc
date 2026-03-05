@@ -1,7 +1,7 @@
 #include "medusa_B.h"
 #include <string.h>
 
-void main(void) 
+int main(void)
 {
   
   long int p1, p2, q1, q2;
@@ -54,6 +54,6 @@ void main(void)
   params << '*' << endl;
   params.close();
 
+  return 0;
 } // main
-
 

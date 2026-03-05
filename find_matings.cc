@@ -75,11 +75,12 @@ void fareysurvey(long int p1, long int q1, long int p2, long int q2,
     }
 }
   
-void main (void)
+int main (void)
 {
   s.open("mating_data.txt");
 
   fareysurvey(1, 7, 1, 3, 7);
 
   s.close();
+  return 0;
 }

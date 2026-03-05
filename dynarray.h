@@ -52,7 +52,7 @@
 
 
 
-const maxlengde=32000; // maximum antal elements en DynArray kan indeholde
+const int maxlengde = 32000; // maximum antal elements en DynArray kan indeholde
 
 
 

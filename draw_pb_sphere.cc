@@ -180,7 +180,7 @@ void draw_pullback(void)
 } // draw_pullback
 
 
-void main(void)
+int main(void)
 {
   // initialization
   a_params = new Param_list (0);
@@ -196,9 +196,9 @@ void main(void)
   // clean up
   delete a_params;
   delete b_params;
+  return 0;
 } // main
   
-
 
 
 
