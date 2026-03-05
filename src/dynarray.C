@@ -30,7 +30,7 @@ template<class T>void DynArray<T>::expand(int l)
     nylengde *= 2;
   // nylengde er det mindste tal der kan skrives paa formen 2^n (n hel), og
   // opfylder at nylende >= lengde.
-  tmpptr = new(T[nylengde]);
+  tmpptr = new T[nylengde];
 #ifdef	FEJL
   if (tmpptr==0) throw Memory();
 #endif 
@@ -121,7 +121,7 @@ template<class T>DynArray<T>::DynArray(T n, int l)
   // lengde er det mindste tal der kan skrives paa formen 2^n (n hel), og
   // opfylder at lende >= l. (Ja der reserveres op til dobbelt meget saa
   // meget plads som noedvendigt.
-  table = new (T[lengde]);
+  table = new T[lengde];
 #ifdef	FEJL
   if (table == 0) throw Memory();// det gik ikke godt
 #endif

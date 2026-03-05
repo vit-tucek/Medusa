@@ -1,0 +1,23 @@
+# IDE settings
+.vscode/
+
+# Object files and build directories
+*.o
+build/
+
+# Project binaries built at repo root
+draw_pb_sphere
+drawpullback
+find_matings
+mate_interact
+
+# Generated runtime files
+medusa_txt
+param.txt
+mating_data.txt
+
+# Generated graphics/output
+gfx/
+output/
+test_output.ps
+test_sphere.ps

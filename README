@@ -1,17 +1,20 @@
-INSTALLING MEDUSA:
+INSTALLING MEDUSA
 
-All programs were written in C++, on a Unix system.  However, user
-interface is minimal, so programs should be easily portable to any
-platform.
+Directory layout:
+- `src/`: all C/C++ source and header files
+- `build/obj/`: object files produced by `make`
+- repository root: executables, documentation, scripts, and generated output dirs
 
-To compile on a Unix system, simply put all source code in a
-directory, together with the Makefile, and type "make all". To remove all
-executables (if you've changed something and want to recompile), type
-"make clean".
+Build:
+- `make all`
 
-If you do make a windows or mac version, please notify us at
-math@math.cornell.edu
+Clean binaries and object files:
+- `make clean`
+
+Generate example graphics:
+- `./generate_graphics.sh`
+- or `./generate_graphics.sh <output_dir>`
 
 
-Programs were written by:  Christian Henriksen, David Farris, and Kuan Ju
+Programs were written by Christian Henriksen, David Farris, and Kuan Ju
 Liu at Cornell University in Summer 1998.

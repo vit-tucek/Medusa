@@ -210,10 +210,10 @@ mixcolour Greybitmap::Getpixel (Uint x, Uint y)
     #ifdef ILL_COOR
       throw Illegal_coordinate();
   };
-  #else ILL_COOR
+  #else // ILL_COOR
   }  // indirectly answer = 0
   else   // If ILL_COOR = FALSE don't warn and don't set pixel
-  #endif ILL_COOR
+  #endif // ILL_COOR
   {
     Ushort *local_bitmap;
     local_bitmap=array;
@@ -275,10 +275,10 @@ void Greybitmap::Putpixel (Uint x, Uint y, mixcolour color)
 	if ((x>=width) || (y>=length) || (x<0) || (y<0)) {
 #ifdef ILL_COOR
 	throw Illegal_coordinate();};
-#else ILL_COOR
+#else // ILL_COOR
 	}
 	else
-#endif ILL_COOR
+#endif // ILL_COOR
 		{
 		/* if (color.reporttone() < 0
 			|| color.reporttone() >= (2 << (noofbitplanes-1)))
@@ -555,10 +555,10 @@ mixcolour Colorbitmap::Getpixel (Uint x, Uint y)
 	if ((x>= width) || (y>= length)) {
 #ifdef ILL_COOR
 	throw Illegal_coordinate();};
-#else ILL_COOR
+#else // ILL_COOR
 	}								// indirectly answer = backgorundCMYK
 	else							// If ILL_COOR = FALSE don't warm and don't set pixel
-#endif ILL_COOR
+#endif // ILL_COOR
 	{
 		Ushort *local_bitmap;
 		local_bitmap=array;
@@ -608,10 +608,10 @@ void Colorbitmap::Putpixel (Uint x, Uint y, mixcolour color)
 	if ((x>=width) || (y>=length) || (x<0) || (y<0)) {
 #ifdef ILL_COOR
 	throw Illegal_coordinate();};
-#else  ILL_COOR
+#else // ILL_COOR
 	}
 	else
-#endif  ILL_COOR
+#endif // ILL_COOR
 		{
 		Ushort *local_bitmap;
 		local_bitmap =array;

@@ -1,41 +1,45 @@
 CXX ?= g++
-CXXFLAGS ?= -I. -std=gnu++98 -fpermissive
+SRC_DIR := src
+OBJ_DIR := build/obj
+CXXFLAGS ?= -I$(SRC_DIR) -std=gnu++98 -fpermissive
 
-all: draw_pb_sphere drawpullback find_matings mate_interact
+BINS := draw_pb_sphere drawpullback find_matings mate_interact
+COMMON_OBJS := $(OBJ_DIR)/medusa_A.o $(OBJ_DIR)/medusa_B.o
 
+.PHONY: all clean test
 
-draw_pb_sphere: draw_pb_sphere.cc cktypes.cc cktypes.h psoop.cc psoop.h dynarray.C dynarray.h CP1.h
-	$(CXX) $(CXXFLAGS) -o draw_pb_sphere draw_pb_sphere.cc
+all: $(BINS)
 
-drawpullback: drawpullback.cc cktypes.cc cktypes.h psoop.cc psoop.h dynarray.C dynarray.h
-	$(CXX) $(CXXFLAGS) -o drawpullback drawpullback.cc
+draw_pb_sphere: $(SRC_DIR)/draw_pb_sphere.cc $(SRC_DIR)/cktypes.cc $(SRC_DIR)/cktypes.h $(SRC_DIR)/psoop.cc $(SRC_DIR)/psoop.h $(SRC_DIR)/dynarray.C $(SRC_DIR)/dynarray.h $(SRC_DIR)/CP1.h
+	$(CXX) $(CXXFLAGS) -o $@ $(SRC_DIR)/draw_pb_sphere.cc
 
-find_matings.o: find_matings.cc medusa_B.h medusa_A.h dynarray.C dynarray.h
-	$(CXX) $(CXXFLAGS) -c find_matings.cc
+drawpullback: $(SRC_DIR)/drawpullback.cc $(SRC_DIR)/cktypes.cc $(SRC_DIR)/cktypes.h $(SRC_DIR)/psoop.cc $(SRC_DIR)/psoop.h $(SRC_DIR)/dynarray.C $(SRC_DIR)/dynarray.h
+	$(CXX) $(CXXFLAGS) -o $@ $(SRC_DIR)/drawpullback.cc
 
-find_matings: find_matings.o medusa_B.o medusa_A.o
-	$(CXX) $(CXXFLAGS) -o find_matings find_matings.o medusa_B.o medusa_A.o
+find_matings: $(OBJ_DIR)/find_matings.o $(COMMON_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-mate_interact.o: mate_interact.cc medusa_B.h medusa_A.h dynarray.C dynarray.h
-	$(CXX) $(CXXFLAGS) -c mate_interact.cc
+mate_interact: $(OBJ_DIR)/mate_interact.o $(COMMON_OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $^
 
-mate_interact: mate_interact.o medusa_B.o medusa_A.o
-	$(CXX) $(CXXFLAGS) -o mate_interact mate_interact.o medusa_B.o medusa_A.o
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-cktypes.o: cktypes.cc cktypes.h
-	$(CXX) $(CXXFLAGS) -c cktypes.cc
+$(OBJ_DIR)/find_matings.o: $(SRC_DIR)/find_matings.cc $(SRC_DIR)/medusa_B.h $(SRC_DIR)/medusa_A.h $(SRC_DIR)/dynarray.C $(SRC_DIR)/dynarray.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(SRC_DIR)/find_matings.cc
 
-psoop.o: psoop.cc psoop.h cktypes.h
-	$(CXX) $(CXXFLAGS) -c psoop.cc
+$(OBJ_DIR)/mate_interact.o: $(SRC_DIR)/mate_interact.cc $(SRC_DIR)/medusa_B.h $(SRC_DIR)/medusa_A.h $(SRC_DIR)/dynarray.C $(SRC_DIR)/dynarray.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(SRC_DIR)/mate_interact.cc
 
-dynarray.o: dynarray.C dynarray.h
-	$(CXX) $(CXXFLAGS) -c dynarray.C
+$(OBJ_DIR)/medusa_A.o: $(SRC_DIR)/medusa_A.cc $(SRC_DIR)/medusa_A.h $(SRC_DIR)/dynarray.C $(SRC_DIR)/dynarray.h | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(SRC_DIR)/medusa_A.cc
 
-medusa_A.o: medusa_A.cc medusa_A.h dynarray.C dynarray.h
-	$(CXX) $(CXXFLAGS) -c medusa_A.cc
+$(OBJ_DIR)/medusa_B.o: $(SRC_DIR)/medusa_B.h $(SRC_DIR)/medusa_B.cc $(SRC_DIR)/medusa_A.h $(SRC_DIR)/dynarray.h $(SRC_DIR)/dynarray.C | $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c -o $@ $(SRC_DIR)/medusa_B.cc
 
-medusa_B.o: medusa_B.h medusa_B.cc medusa_A.h dynarray.h dynarray.C
-	$(CXX) $(CXXFLAGS) -c medusa_B.cc
+test: all
+	./generate_graphics.sh
 
 clean:
-	rm -f *.o draw_pb_sphere drawpullback find_matings mate_interact
+	rm -rf $(OBJ_DIR)
+	rm -f *.o $(BINS)

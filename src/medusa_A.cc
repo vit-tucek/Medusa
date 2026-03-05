@@ -622,6 +622,10 @@ int	find_intersections (CComplex a, CComplex b, CComplex star,
 		order_points (lista_pts);
 		return (3);
 	}
+
+	order_points (intersection_pts);
+	order_points (lista_pts);
+	return (2);
 }
 /* End of find_intersections */
 
@@ -1009,5 +1013,4 @@ int	can_prune (CComplex a, CComplex b, CComplex c, CComplex star,
 	return (1);
 }
 /* End of can_prune */
-
 

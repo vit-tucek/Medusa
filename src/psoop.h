@@ -220,7 +220,7 @@ class Colorbitmap : public Bitmap
 		bmtype type(void) {return cmyk;}; // reports type of bitmap
 };
 
-#endif __CKPSOOP_H
+#endif // __CKPSOOP_H
 
 
 
