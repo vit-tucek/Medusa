@@ -11,7 +11,7 @@ Build:
 Clean binaries and object files:
 - `make clean`
 
-Generate example graphics:
+Generate example graphics (PDF):
 - `./generate_graphics.sh`
 - or `./generate_graphics.sh <output_dir>`
 

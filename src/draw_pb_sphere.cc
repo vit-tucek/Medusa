@@ -176,7 +176,7 @@ void draw_pullback(void)
       }
     } // for
   } // for
-  bm.ToPS(ot, 0);
+  bm.ToPDF(ot);
 } // draw_pullback
 
 
@@ -199,7 +199,6 @@ int main(void)
   return 0;
 } // main
   
-
 
 
 

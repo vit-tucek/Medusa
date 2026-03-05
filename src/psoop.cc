@@ -1,74 +1,76 @@
 /*-----------------------------------------------------------------------------
- *  psoopems.cpp    This part of the code can create a bitmap in the memory.
- *						  Output for the bitmap can only be done in a PostScript file.
- *	  				  The reson for this is that the code is primally made for UNIX
- *					  and the use of creating pictures which is to be printed by a
- *					  PostScript laserprinter or a typesetter(for prof. use).
- *					     If the compile variable 'EXISTS_DOS' is defined the compiler
- *					  will produce a code that uses EMS memory. The choice of EMS as
- *					  memory expander on the PC under DOS was because the adressing
- *					  is faster(I tested it, it's about 40 % faster than XMS).
- *					  The code emsmem.h is taken from ftp.borland.com and the only
- *					  changes made to it, was to disable the text output, which was
- *					  produced while reading and writting in the memory.
- *					  The code emsmem.h isn't 100 % working, but this is not my fault
- *					  - I didn't make it, Borland did. The problem arrises when
- *					  trying to use more than one EMS block at the same time, ex.
- *					  generating two bitmaps at the same time, normally the bitmaps
- *					  would get different Handle numbers, and when wanting to adress
- *					  bitmap one the EMSHandles number should be set the number
- *					  which the alloc routine itself generered under allocation one,
- *               and the same thing to do if the bitmap in questing was no two.
- *					  But the second bitmap sometimes get trashed.
- *					  This implies that only one bitmap at atime can be created, if
- *					  the first bitmap is deallocated before creating the new one all
- *					  is OK. The classes 'Greybitmap' and 'Colorbitmap' each have a
- *					  EMSHandles(int) variable, this is done for future developments.
- *					  If the code is supposed to run under UNIX or WIN95, the
- *					  'EXISTS_DOS' has to undefined, so the code generered uses the
- *					  standard malloc.h routines. Under these systems, the memory
- *					  isn't limited to 64 Kb (or when using FAR pointers 640 Kb).
- *                  There are places in the code where more OOP could have been
- *					  introduced, this is not been done because of efficiency (even
- *					  though Bjarne Stroustrup(the auther of c++ OOP) says that no
- *					  overhead is introduced when using c++ OOP instead of c - THIS
- *					  IS NOT TRUE - well not in the Borland version 4.5 it isn't).
- *					     Another funny thing is the function 'ToPS', which is virtual
- *               in class Bitmap and fully declared in Grey- and Colorbitmap.
- *					  At this time alot of the code in the two versions are the same
- *					  , but for future versions, where it's quite possible that the
- *					  code is going to be quite different, they are both fully
- *					  declared instead of making a general part and a part for each
- *					  bitmap type(color or grey).
- *					     Also in the function 'ToPS' the variable 'compression'
- *					  is not at this time fully utialised, but included for future
- *					  use. (When I find out how PostScript uses LZW coding!).
- * 				     When using the EMS version of the code in a DOS window under
- *						Microsoft Windows or OS/2 the code can use virtual EMS memory,
- *					  eg. EMS 'memory' which is present in the swap file on the
- *					  hard drive. This ofcause slows down the adressing in the EMS,
- *					  but enables the use of bitmap up to 32 MB.
- *					     In the class 'Bitmap' a class 'Fileerror' exists. This is a
- *					  error class for future use by the 'ToPS' routines.
+ * psoop.cc
  *
- *					     The compiler variable 'ILL_COOR' controls if, when trying to
- *					  adress a illegal coordinate, the code should throw an exception
- *					  or just continue.
- *					     'backgorundcolor' contains the value, that the bitmap is
- *					  iniatialised to -both grey and color. In the color version all
- *					  four colors pr. pixel is set to this value.
- *							Remember that when creating a greyshade bitmap the number
- *               of bitplanes has to be 1, 2, 4 or 8. Other values will corrupt
- *					  the PostScript file. There is now checking for this, because
- *					  for future use other numbers could be practical.
- *
- *               		(c)	Klavs	Riisager
- *
- *				Problems with the code? Mail me at: gc922727@gbar.dtu.dk
- *                             				  or: Klaus.Riisager.mat.dtu.dk
- *----------------------------------------------------------------------------*/
+ * Bitmap rendering/output support for Medusa.
+ * The original code targeted PostScript; the active output path is now PDF.
+ *-----------------------------------------------------------------------------
+ */
 
 #include "psoop.h"
+
+static void WritePdfImage(Outputtype Outputinfo,
+                          Ulong width,
+                          Ulong length,
+                          const Ushort* image_data,
+                          Ulong image_bytes,
+                          const char* color_space,
+                          Ushort bits_per_component)
+{
+  double dpi = (Outputinfo.dpi == 0) ? 72.0 : double(Outputinfo.dpi);
+  double width_pt = 72.0 * double(width) / dpi;
+  double height_pt = 72.0 * double(length) / dpi;
+
+  char content_stream[256];
+  int content_len = sprintf(content_stream,
+                            "q\n%.6f 0 0 %.6f 0 %.6f cm\n/Im0 Do\nQ\n",
+                            width_pt, -height_pt, height_pt);
+
+  ofstream fo(Outputinfo.Filename, ios::binary);
+  if (!fo) return;
+
+  long offsets[7];
+
+  fo << "%PDF-1.4\n";
+
+  offsets[1] = long(fo.tellp());
+  fo << "1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n";
+
+  offsets[2] = long(fo.tellp());
+  fo << "2 0 obj\n<< /Type /Pages /Count 1 /Kids [3 0 R] >>\nendobj\n";
+
+  offsets[3] = long(fo.tellp());
+  fo << "3 0 obj\n<< /Type /Page /Parent 2 0 R\n";
+  fo << "   /MediaBox [0 0 " << width_pt << " " << height_pt << "]\n";
+  fo << "   /Resources << /XObject << /Im0 5 0 R >> >>\n";
+  fo << "   /Contents 4 0 R >>\nendobj\n";
+
+  offsets[4] = long(fo.tellp());
+  fo << "4 0 obj\n<< /Length " << content_len << " >>\nstream\n";
+  fo.write(content_stream, content_len);
+  fo << "endstream\nendobj\n";
+
+  offsets[5] = long(fo.tellp());
+  fo << "5 0 obj\n<< /Type /XObject /Subtype /Image\n";
+  fo << "   /Width " << width << " /Height " << length << "\n";
+  fo << "   /ColorSpace /" << color_space << "\n";
+  fo << "   /BitsPerComponent " << short(bits_per_component) << "\n";
+  fo << "   /Length " << image_bytes << " >>\nstream\n";
+  fo.write((const char*)image_data, image_bytes);
+  fo << "\nendstream\nendobj\n";
+
+  offsets[6] = long(fo.tellp());
+  fo << "6 0 obj\n<< /Producer (Medusa PDF renderer) >>\nendobj\n";
+
+  long xref_pos = long(fo.tellp());
+  fo << "xref\n0 7\n";
+  fo << "0000000000 65535 f \n";
+  for (int i = 1; i <= 6; i++) {
+    fo << setw(10) << setfill('0') << offsets[i] << " 00000 n \n";
+  }
+  fo << "trailer\n<< /Size 7 /Root 1 0 R /Info 6 0 R >>\n";
+  fo << "startxref\n" << xref_pos << "\n%%EOF\n";
+  fo.close();
+}
 
 
 
@@ -296,150 +298,20 @@ void Greybitmap::Putpixel (Uint x, Uint y, mixcolour color)
 
 
 
-/*-----------------------------------------------------------------------------
- * Greybitmap::ToPS(Outputtype, compression) Dumps the bitmap to a file *									(name given	in Input) in POSTSCRIPT format. *									compression enables different kinds of compression to *									be applied to the bitmap (no picture loss). *
- *	Abstraction: (char* * Uint) * Ushort -> _
- *
- *	 INPUT:  Outputinfo		(struct) Consists of specific information about the
- *									way the output should be generered. (See the struct
- *									for more information)
- *			   compression		(Ushort)
- *									0 = 	No compression , bitmap stored as hex-values
- *                               giving a filesize of 2*sizeof(bitmap).
- *									1 =   No compression , bitmap stored as coded ASCII85
- * 										giving a filesize of 5/4 * sizeof(bitmap)
- *									2 =   compression , bitmap stored as LZW coded
- *
- *	OUTPUT:						a POSTSCRIPT file
- *	LOCALS:	ps_lower_x 		(const Uint) *1/72 inch from the left lower corner.
- *				ps_lower_y 		(const Uint) *1/72 inch from the bottom.
- *			   text_size		(const Uint) *1/72 inch - the font size.
- *				linespace		(const Uint) *1/72 inch - the space between the lines
- *				border_width	(const Uint) *1/72 inch - the width of the border
- * 			noofbytes		(Ulong)	The number of bytes in the bitmaps.
- * 			nooflword		(Ulong)	The number of long word in the bitmaps.
- *				width				(Ulong) a 32 bit expansion of Bitmap::width
- *				length			(Ulong) a 32 bit expansion of Bitmap::length
- *				fo					(ofstream) the output stream
- *				local_bitmap	(Ushort*) A copy of the pointer to the bitmap
- *				counter			(Ulong) a counter
- *	CLASS LOCALS:				Uses Bitmap::width(Uint),Bitmap::length(Uint)
- * 								Greybitmap::noofbitplanes(Ushort)
- *									Bitmap::Array(*Ushort), Greybitmap::EMSHandles(int)
- *									(emsmem.h - EMSHandle)
- * USES:	open()				(fstream.h)
- *			close()				(fstream.h)
- *			setw()				(iomanip.h)
- *			setfill()			(iomanip.h)
- *			hex					(iomanip.h)
- *			GetVal()				(emsmem.h)
- *	LOG  :						06.01.95	ToPS created - Only support for
- *									normal memory allocation (malloc) at this time.
- *									Will run normal under UNIX, but is restricted to
- *									64 Kbyte when run on a PC under DOS.
- *									No support for compression yet(only compression = 0).
- *									06.05.95 Function changed to take a struct as input
- *									instead of inheritance of a class Input.
- *									I have to use typecasting to get type Ushort right
- *									Problem arrises in noofbitplanes and when dumping a
- *									pixel value.
- *                         Remembered problems when multipling someting with a
- *									(in this case) word, the result has to fit in the
- *									datatype of the factor with the biggest datatype ex.
- *									{Uint x = 1000; x = x *1000 / 1000; - x*1000 can't
- *									fit in a word - result unknown.
- *									Problems solved by using typeconvension in the
- *									funcktion to Ulong.(maxint*maxint can fit in a Ulong)
- *---------------------------------------------------------------------------*/
-void Greybitmap::ToPS(Outputtype Outputinfo,  Ushort compresssion)
+
+void Greybitmap::ToPDF(Outputtype Outputinfo)
 {
-  const Uint  ps_lower_x = 72;
-  const Uint  ps_lower_y = 72;
-  const Uint  border_width= 1;
-  const Uint  text_size   = 10;
-  const Uint  linespace  =  2;
   Ulong width = Bitmap::width;
   Ulong length = Bitmap::length;
-
-  ofstream fo;
-  fo.open(Outputinfo.Filename);
-  fo << "%!PS-Adobe-3.0 EPSF-3.0" << endl;
-  fo << "%%Title: " << Outputinfo.Filename << endl;
-  fo << "%%Creators: Christian Henriksen & Klavs Riisager" << endl;
-  fo << "%%BoundingBox: " << (ps_lower_x-border_width) << " " <<
-		  (ps_lower_y-border_width) << " " <<
-		  ((ps_lower_x)+ (72*width)/Outputinfo.dpi+2*border_width) << " " <<
-		  ((ps_lower_y)+ (72*length)/Outputinfo.dpi+border_width) << endl;
-  fo << "%%Pages: 1" << endl;
-  fo << "%%DocumentFonts:" << endl;
-  fo << "%%EndComments" << endl;
-  fo << "%%EndProlog" << endl;
-  fo << "%%Page: 1 1" << endl;
-
-
-/*
-  fo << "newpath" << endl;  // (left side sync mark)
-  fo << (ps_lower_x-border_width) << " " <<
-		  (ps_lower_y-border_width+72/3*length/Outputinfo.dpi) << " moveto"<<endl;
-  fo << "0 " << (72/3*length/Outputinfo.dpi) << " rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (upper side sync mark)
-  fo << (ps_lower_x-border_width+72/3*width/Outputinfo.dpi) << " " <<
-		  (ps_lower_y+border_width+72*length/Outputinfo.dpi) <<
-		  " moveto" << endl;
-  fo << (72/3*width/Outputinfo.dpi) << " 0 rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (right side sync mark)
-  fo << (ps_lower_x+(72*width/Outputinfo.dpi)+2*border_width) << " " <<
-		  ((ps_lower_y-border_width)+(((72/3)*length)/Outputinfo.dpi)) <<
-		  " moveto" << endl;
-  fo << "0 " << (((72/3)*length)/Outputinfo.dpi) << " rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (lower side sync mark)
-  fo << (ps_lower_x-border_width+(72/3*width/Outputinfo.dpi)) << " " <<
-		  (ps_lower_y-border_width) << " moveto" << endl;
-  fo << (72/3*width/Outputinfo.dpi) << " 0 rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-*/
-
-
-  fo << "/origstate save def" << endl;
-  fo << "20 dict begin" << endl;
-  fo << "/pix " << int((width*noofbitplanes+7)/8) << " string def" << endl;
-  fo << (ps_lower_x) << " " << (ps_lower_y) << " translate" << endl;
-  fo << double(72)*width/Outputinfo.dpi << " " <<
-		  double(72)*length/Outputinfo.dpi <<	" scale" << endl;
-  fo << width << " " << length << " " << short(noofbitplanes) << " [" <<
-		  width << " 0 0 -" << length << " 0 " << length << "]" << endl;
-  fo << "{currentfile pix readhexstring pop}" << endl;
-  fo << "image" << endl;
-  Ushort *local_bitmap=array;
-  Ulong noofbytes= Ulong(width)/8*length*noofbitplanes;
-  for (Ulong counter=0;(counter<noofbytes);counter++)
-  {
-	  fo << setw(2) << setfill('0') <<  hex << short(*local_bitmap);
-												// We have to print -  ex. 0F and not F
-	  if ((counter % 40)==0) fo << endl; // look out for long lines
-	  local_bitmap++;
-  }
-  fo << endl;
-  fo << "showpage" << endl;
-  fo << "end" << endl;
-  fo << "origstate restore" << endl;
-  fo << "%%Trailer" << endl;
-  fo.close();
-};
+  Ulong noofbytes = Ulong(width)/8*length*noofbitplanes;
+  WritePdfImage(Outputinfo,
+                width,
+                length,
+                array,
+                noofbytes,
+                "DeviceGray",
+                noofbitplanes);
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -626,129 +498,17 @@ void Colorbitmap::Putpixel (Uint x, Uint y, mixcolour color)
 
 
 
-/*-----------------------------------------------------------------------------
- * Colorbitmap::ToPS(Outputtype, compression) Dumps the bitmap to a file *									(name given	in Input) in POSTSCRIPT format. *									compression enables different kinds of compression to *									be applied to the bitmap (no picture loss). *
- *	Abstraction: (char* * Uint) * Ushort -> _
- *
- *	 INPUT:  Outputinfo		(struct) Consists of specific information about the
- *									way the output should be generered. (See the struct
- *									for more information)
- *			   compression		(Ushort)
- *									0 = 	No compression , bitmap stored as hex-values
- *                               giving a filesize of 2*sizeof(bitmap).
- *									1 =   No compression , bitmap stored as coded ASCII85
- * 										giving a filesize of 5/4 * sizeof(bitmap)
- *									2 =   compression , bitmap stored as LZW coded
- *
- *	OUTPUT:						a POSTSCRIPT file
- *	LOCALS:	ps_lower_x 		(const Uint) *1/72 inch from the left lower corner.
- *				ps_lower_y 		(const Uint) *1/72 inch from the bottom.
- *			   text_size		(const Uint) *1/72 inch - the font size.
- *				linespace		(const Uint) *1/72 inch - the space between the lines
- *				border_width	(const Uint) *1/72 inch - the width of the border
- * 			noofbytes		(Ulong)	The number of bytes in the bitmaps.
- * 			nooflword		(Ulong)	The number of long word in the bitmaps.
- *				width				(Ulong) a 32 bit expansion of Bitmap::width
- *				length			(Ulong) a 32 bit expansion of Bitmap::length
- *				fo					(ofstream) the output stream
- *				local_bitmap	(Ushort*) A copy of the pointer to the bitmap
- *				counter			(Ulong) a counter
- *	CLASS LOCALS:				Uses Bitmap::width(Uint),Bitmap::length(Uint)
- *									Bitmap::Array(*Ushort), Colorbitmap::EMSHandles(int)
- *									(emsmem.h - EMSHandle)
- * USES:	open()				(fstream.h)
- *			close()				(fstream.h)
- *			setw()				(iomanip.h)
- *			setfill()			(iomanip.h)
- *			hex					(iomanip.h)
- *			GetVal()				(emsmem.h)
- *	LOG  :						06.07.95	ToPS created. At this time only support for
- *									'no compression' or compression=0.(all values are
- *									accepted)
- *---------------------------------------------------------------------------*/
-void Colorbitmap::ToPS(Outputtype Outputinfo,  Ushort compresssion)
+
+void Colorbitmap::ToPDF(Outputtype Outputinfo)
 {
-  const Uint  ps_lower_x = 72;
-  const Uint  ps_lower_y = 72;
-  const Uint  border_width= 1;
-  const Uint  text_cpi   = 10;
-  const Uint  linespace  =  2;
   Ulong width = Bitmap::width;
   Ulong length = Bitmap::length;
-
-  ofstream fo;
-  fo.open(Outputinfo.Filename);
-  fo << "%!PS-Adobe-3.0 EPSF-3.0" << endl;
-  fo << "%%Title: " << Outputinfo.Filename << endl;
-  fo << "%%Creators: Christian Henriksen & Klavs Riisager" << endl;
-  fo << "%%BoundingBox: " << (ps_lower_x-border_width) << " " <<
-		  (ps_lower_y-border_width) << " " <<
-		  ((ps_lower_x)+ (72*width)/Outputinfo.dpi+2*border_width) << " " <<
-		  ((ps_lower_y)+ (72*length)/Outputinfo.dpi+border_width) << endl;
-  fo << "%%Pages: 1" << endl;
-  fo << "%%DocumentFonts:" << endl;
-  fo << "%%EndComments" << endl;
-  fo << "%%EndProlog" << endl;
-  fo << "%%Page: 1 1" << endl;
-  fo << "newpath" << endl; 						// (left side sync mark)
-  fo << (ps_lower_x-border_width) << " " <<
-		  (ps_lower_y-border_width+72/3*length/Outputinfo.dpi) << " moveto"<<endl;
-  fo << "0 " << (72/3*length/Outputinfo.dpi) << " rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (upper side sync mark)
-  fo << (ps_lower_x-border_width+72/3*width/Outputinfo.dpi) << " " <<
-		  (ps_lower_y+border_width+72*length/Outputinfo.dpi) <<
-		  " moveto" << endl;
-  fo << (72/3*width/Outputinfo.dpi) << " 0 rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (right side sync mark)
-  fo << (ps_lower_x+(72*width/Outputinfo.dpi)+2*border_width) << " " <<
-		  ((ps_lower_y-border_width)+(((72/3)*length)/Outputinfo.dpi)) <<
-		  " moveto" << endl;
-  fo << "0 " << (((72/3)*length)/Outputinfo.dpi) << " rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "newpath" << endl; 						// (lower side sync mark)
-  fo << (ps_lower_x-border_width+(72/3*width/Outputinfo.dpi)) << " " <<
-		  (ps_lower_y-border_width) << " moveto" << endl;
-  fo << (72/3*width/Outputinfo.dpi) << " 0 rlineto" << endl;
-  fo << "closepath" << endl;
-  fo << border_width << " setlinewidth" << endl;
-  fo << "stroke" << endl;
-
-  fo << "/origstate save def" << endl;
-  fo << "20 dict begin" << endl;
-  fo << "/pix " << int((width*4+7)/8) << " string def" << endl;
-  fo << (ps_lower_x) << " " << (ps_lower_y) << " translate" << endl;
-  fo << double(72)*width/Outputinfo.dpi << " " <<
-		  double(72)*length/Outputinfo.dpi <<	" scale" << endl;
-  fo << width << " " << length << " 8" << " [" <<
-		  width << " 0 0 -" << length << " 0 " << length << "]" << endl;
-  fo << "{currentfile pix readhexstring pop}" << endl;
-  fo << "false 4 colorimage" << endl;
-  Ushort *local_bitmap=array;
-  Ulong noofbytes= Ulong(width)*length*4;
-  for (Ulong counter=0;(counter<noofbytes);counter++)
-  {
-	  fo << setw(2) << setfill('0') <<  hex << short(*local_bitmap);
-												// We have to print -  ex. 0F and not F
-	  if ((counter % 40)==0) fo << endl; // look out for long lines
-	  local_bitmap++;
-  }
-  fo << endl;
-  fo << "showpage" << endl;
-  fo << "end" << endl;
-  fo << "origstate restore" << endl;
-  fo << "%%Trailer" << endl;
-  fo.close();
-};
-
-
+  Ulong noofbytes = Ulong(width)*length*4;
+  WritePdfImage(Outputinfo,
+                width,
+                length,
+                array,
+                noofbytes,
+                "DeviceCMYK",
+                8);
+}

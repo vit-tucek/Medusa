@@ -30,12 +30,12 @@ typedef unsigned char 		Pixeltype;
 
 
 /*------------------------------------------------------------------------------
- * Outputtype		The input data struct for the 'ToPS()' function.
+ * Outputtype		The input data struct for bitmap output functions.
  *						The struct contains important information about the bitmap
  *						and the file to be created.
  *
  * ELEMENTS:
- *		dpi			(Uint) Dots pr. inch in the output file in PostScipt format.
+ *		dpi			(Uint) Dots pr. inch in the output file.
  *		Filename    (char[36]) The name of the outputfile.
  *	LOG:				06.08.95 Documentation written for this native type.
  *----------------------------------------------------------------------------*/
@@ -74,10 +74,8 @@ struct	Outputtype
  *            Getpixel		(pure virtual mixcolour)(Uint x, Uint y)
  *									Raeds a pixel in the bitmap-see Greybitmap::Getpixel
  *									and Colorbitmap::Getpixel for full documentation.
- *				  ToPS			(pure virtual void) (Outputtype Outputinfo,
- *									Ushort compression).Dumps the bitmap to a PostScript
- *									file - see Greybitmap::ToPS and Colorbitmap::ToPS for
- *									full documentation.
+ *				  ToPDF			(pure virtual void) (Outputtype Outputinfo).
+ *									Dumps the bitmap to a PDF file.
  *				 type				(pure virtual bmtype) (). Returns the type of the
  *									bitmap (colour / Grey).
  *           Fileerror		Exception class - can be used if error is incounted
@@ -109,7 +107,7 @@ class	Bitmap
 		virtual ~Bitmap() {};
 		virtual void Putpixel(Uint x, Uint y, mixcolour color) = 0;
 		virtual mixcolour Getpixel (Uint x, Uint y)=0;
-		virtual void  ToPS(Outputtype Outputinfo, Ushort compression) = 0;
+		virtual void  ToPDF(Outputtype Outputinfo) = 0;
 		virtual bmtype	type(void) = 0;
 				// here the children returns their kind of bitmap
 		class    Fileerror
@@ -174,8 +172,8 @@ class Greybitmap : public Bitmap
     // Get the pixel value at (x,y)
     void Putpixel (Uint x, Uint y, mixcolour color);
 	// stores a pixel with 'color' at (x,y)
-    void ToPS(Outputtype Outputinfo, Ushort compression);
-        // Creates a POSTSCRIPT file of the picture
+    void ToPDF(Outputtype Outputinfo);
+        // Creates a PDF file of the picture
     bmtype type(void) {return graytone;}; // Reports the type of the bitmap
 };
 
@@ -215,14 +213,12 @@ class Colorbitmap : public Bitmap
 												// Get the pixel value at (x,y)
 		void		Putpixel (Uint x, Uint y, mixcolour color);
 												// stores a pixel with 'color' at (x,y)
-		void 		ToPS(Outputtype Outputinfo, Ushort compression);
-												// Creates a POSTSCRIPT file of the picture
+		void 		ToPDF(Outputtype Outputinfo);
+												// Creates a PDF file of the picture
 		bmtype type(void) {return cmyk;}; // reports type of bitmap
 };
 
 #endif // __CKPSOOP_H
-
-
 
 
 

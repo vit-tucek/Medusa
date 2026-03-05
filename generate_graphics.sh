@@ -23,8 +23,8 @@ run_case() {
   local tag="$6"
 
   local param_file="${output_dir}/${tag}.txt"
-  local plane_file="${output_dir}/${tag}p.eps"
-  local sphere_file="${output_dir}/${tag}s.eps"
+  local plane_file="${output_dir}/${tag}p.pdf"
+  local sphere_file="${output_dir}/${tag}s.pdf"
 
   printf '%s\n' \
     "$p1" "$q1" "$p2" "$q2" "$param_file" "$iters" "q" \
