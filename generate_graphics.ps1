@@ -7,21 +7,27 @@ $ErrorActionPreference = "Stop"
 
 Set-Location $PSScriptRoot
 
-if (Test-Path "build/vscode-msvc/Release") {
-  $BinDir = "build/vscode-msvc/Release"
-} else {
-  $BinDir = "build/vscode-msvc"
+$binCandidates = @(
+  ".",
+  "build/vscode-msvc/Release",
+  "build/vscode-msvc"
+)
+$BinDir = $null
+foreach ($candidate in $binCandidates) {
+  if ((Test-Path (Join-Path $candidate "mate_interact.exe")) -and
+      (Test-Path (Join-Path $candidate "drawpullback.exe")) -and
+      (Test-Path (Join-Path $candidate "draw_pb_sphere.exe"))) {
+    $BinDir = $candidate
+    break
+  }
 }
 
 if (-not (Test-Path $OutputDir)) {
   New-Item -ItemType Directory -Path $OutputDir | Out-Null
 }
 
-$binaries = @("mate_interact.exe", "drawpullback.exe", "draw_pb_sphere.exe")
-foreach ($bin in $binaries) {
-  if (-not (Test-Path "$BinDir/$bin")) {
-    throw "Missing $BinDir/$bin. Run VS Code task 'Build All (MSVC)' first."
-  }
+if ($null -eq $BinDir) {
+  throw "Missing required executables. Run VS Code task 'Build All (MSVC)' first."
 }
 
 function Run-Case {
@@ -42,7 +48,7 @@ $q2
 $paramFile
 $iters
 q
-"@ | & "$BinDir/mate_interact.exe" | Out-File (Join-Path $OutputDir "$tag`_mate.log")
+"@ | & (Join-Path $BinDir "mate_interact.exe") | Out-File (Join-Path $OutputDir "$tag`_mate.log")
 
   @"
 $planeFile
@@ -52,13 +58,13 @@ $paramFile
 -3
 3
 120
-"@ | & "$BinDir/drawpullback.exe" | Out-File (Join-Path $OutputDir "$tag`_plane.log")
+"@ | & (Join-Path $BinDir "drawpullback.exe") | Out-File (Join-Path $OutputDir "$tag`_plane.log")
 
   @"
 $sphereFile
 $paramFile
 120
-"@ | & "$BinDir/draw_pb_sphere.exe" | Out-File (Join-Path $OutputDir "$tag`_sphere.log")
+"@ | & (Join-Path $BinDir "draw_pb_sphere.exe") | Out-File (Join-Path $OutputDir "$tag`_sphere.log")
 
   Write-Host "Created $planeFile and $sphereFile"
 }

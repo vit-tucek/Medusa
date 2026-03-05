@@ -15,6 +15,13 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+# Match Makefile behavior: place built executables at repository root.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
+foreach(cfg Debug Release RelWithDebInfo MinSizeRel)
+  string(TOUPPER "${cfg}" cfg_upper)
+  set("CMAKE_RUNTIME_OUTPUT_DIRECTORY_${cfg_upper}" "${CMAKE_SOURCE_DIR}")
+endforeach()
+
 # draw_* pull in cktypes/psoop/dynarray via includes in the source itself.
 add_executable(draw_pb_sphere src/draw_pb_sphere.cc)
 add_executable(drawpullback src/drawpullback.cc)

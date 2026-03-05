@@ -13,6 +13,12 @@ draw_pb_sphere
 drawpullback
 find_matings
 mate_interact
+draw_pb_sphere.exe
+drawpullback.exe
+find_matings.exe
+mate_interact.exe
+*.pdb
+*.ilk
 
 # Generated runtime files
 medusa_txt

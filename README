@@ -18,7 +18,7 @@ Generate example graphics (PDF):
 Windows + VS Code (MSVC):
 - Open the folder in VS Code from a "Developer PowerShell for VS" terminal.
 - Run task: `Build All (MSVC)` (Ctrl+Shift+B).
-- Binaries are generated in `build/vscode-msvc/Release` as `.exe` files.
+- Binaries are generated in repository root as `.exe` files.
 - Equivalent terminal commands:
 - `cmake -S . -B build/vscode-msvc -G "Visual Studio 17 2022" -A x64`
 - `cmake --build build/vscode-msvc --config Release`
