@@ -15,6 +15,17 @@ Generate example graphics (PDF):
 - `./generate_graphics.sh`
 - or `./generate_graphics.sh <output_dir>`
 
+Windows + VS Code (MSVC):
+- Open the folder in VS Code from a "Developer PowerShell for VS" terminal.
+- Run task: `Build All (MSVC)` (Ctrl+Shift+B).
+- Binaries are generated in `build/vscode-msvc/Release` as `.exe` files.
+- Equivalent terminal commands:
+- `cmake -S . -B build/vscode-msvc -G "Visual Studio 17 2022" -A x64`
+- `cmake --build build/vscode-msvc --config Release`
+- Optional sample output generation:
+- `powershell -ExecutionPolicy Bypass -File .\generate_graphics.ps1`
+- or `powershell -ExecutionPolicy Bypass -File .\generate_graphics.ps1 -OutputDir output`
+
 
 Programs were written by Christian Henriksen, David Farris, and Kuan Ju
 Liu at Cornell University in Summer 1998.

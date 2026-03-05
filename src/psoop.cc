@@ -274,7 +274,7 @@ mixcolour Greybitmap::Getpixel (Uint x, Uint y)
  *---------------------------------------------------------------------------*/
 void Greybitmap::Putpixel (Uint x, Uint y, mixcolour color)
 {
-	if ((x>=width) || (y>=length) || (x<0) || (y<0)) {
+	if ((x>=width) || (y>=length)) {
 #ifdef ILL_COOR
 	throw Illegal_coordinate();};
 #else // ILL_COOR
@@ -477,7 +477,7 @@ mixcolour Colorbitmap::Getpixel (Uint x, Uint y)
  *---------------------------------------------------------------------------*/
 void Colorbitmap::Putpixel (Uint x, Uint y, mixcolour color)
 {
-	if ((x>=width) || (y>=length) || (x<0) || (y<0)) {
+	if ((x>=width) || (y>=length)) {
 #ifdef ILL_COOR
 	throw Illegal_coordinate();};
 #else // ILL_COOR

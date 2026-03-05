@@ -1,0 +1,98 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Configure (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-S",
+        ".",
+        "-B",
+        "build/vscode-msvc",
+        "-G",
+        "Visual Studio 17 2022",
+        "-A",
+        "x64"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build All (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build/vscode-msvc",
+        "--config",
+        "Release"
+      ],
+      "dependsOn": "Configure (MSVC)",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build draw_pb_sphere (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build/vscode-msvc",
+        "--config",
+        "Release",
+        "--target",
+        "draw_pb_sphere"
+      ],
+      "dependsOn": "Configure (MSVC)",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build drawpullback (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build/vscode-msvc",
+        "--config",
+        "Release",
+        "--target",
+        "drawpullback"
+      ],
+      "dependsOn": "Configure (MSVC)",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build find_matings (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build/vscode-msvc",
+        "--config",
+        "Release",
+        "--target",
+        "find_matings"
+      ],
+      "dependsOn": "Configure (MSVC)",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Build mate_interact (MSVC)",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "build/vscode-msvc",
+        "--config",
+        "Release",
+        "--target",
+        "mate_interact"
+      ],
+      "dependsOn": "Configure (MSVC)",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

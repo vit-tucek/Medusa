@@ -810,7 +810,7 @@ int Medusa::iterate(void)
   else
   {
      cout << "Unable to continue.\n";
-     exit(0);
+     return 0;
   }
   return ok;
 };
@@ -898,6 +898,11 @@ Medusa::~Medusa(void)
 	}
     };
   delete [] o_legs;
+
+  delete i_preim1;
+  delete i_preim2;
+  delete o_preim1;
+  delete o_preim2;
 } // ~Medusa(void)
 
   

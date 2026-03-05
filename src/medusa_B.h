@@ -16,6 +16,7 @@ class Medusa_comp
 
   public :
     Medusa_comp(const CComplex& x) {z=x; next_component = 0;};
+    virtual ~Medusa_comp(void) {};
     CComplex position(void);
     virtual Ctype type(void)=0;
     Medusa_comp* next_component;
@@ -127,7 +128,6 @@ class Medusa
 
 
 #endif
-
 
 
 

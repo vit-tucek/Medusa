@@ -1,5 +1,8 @@
 # IDE settings
-.vscode/
+.vscode/*
+!.vscode/c_cpp_properties.json
+!.vscode/launch.json
+!.vscode/tasks.json
 
 # Object files and build directories
 *.o
