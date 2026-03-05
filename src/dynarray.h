@@ -55,6 +55,10 @@
 const int maxlengde = 32000; // maximum antal elements en DynArray kan indeholde
 
 
+template<class T> class DynArray;
+template<class T> ostream& operator<<(ostream& stream, const DynArray<T>& a);
+
+
 
 template<class T> class DynArray
 {
@@ -81,7 +85,7 @@ template<class T> class DynArray
   class Memory { };
   // exception, kastes hvis der ikke kan reserveres lager
   
-  DynArray(DynArray<T>& a);
+  DynArray(const DynArray<T>& a);
   // constructor med tilskrivning til andet DynArray. Tillader bla. at
   // DynArray's overfoeres som vaerdi parametre (paspaa...).
   
@@ -122,7 +126,7 @@ template<class T> class DynArray
   // friend ostream& operator<<(ostream& stream, DynArray<char> a);
   // speciel string output
   
-friend ostream& operator<<(ostream& stream, DynArray<T> a);
+friend ostream& operator<< <>(ostream& stream, const DynArray<T>& a);
   // Standard (vektor stil) output
 };
 

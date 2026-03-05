@@ -48,7 +48,7 @@ template<class T>void DynArray<T>::expand(int l)
 
 
 
-template<class T>ostream& operator<<(ostream& stream, DynArray<T>a)
+template<class T>ostream& operator<<(ostream& stream, const DynArray<T>& a)
 // public metode
 //
 // Beskrivelse :
@@ -78,7 +78,7 @@ ostream& operator<<(ostream& stream, DynArray<char>a)
 */
 
 
-template<class T>DynArray<T>::DynArray(DynArray<T>& a)
+template<class T>DynArray<T>::DynArray(const DynArray<T>& a)
 // public metode
 //
 // Beskrivelse :
@@ -221,13 +221,14 @@ template<class T>DynArray<T>& DynArray<T>::operator = (const DynArray<T>& a)
 //	Returnerer : (DynArray<T>&) svarende til a. dvs tilskrivning af typen
 //		 b = c = a ok
 {
+  if (this == &a) return (*this);
   // Det aktuelle array lukkes ned :
   delete[] table;
   // og et nyt (magen til a) oprettes :
   lengde = a.lengde;
   maxassign = a.maxassign;
   nul = a.nul;
-  table = new(T[lengde]);
+  table = new T[lengde];
   for (int i = 0; i < maxassign; i++)
     table[i] = a.table[i];
   return (*this);
